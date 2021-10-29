@@ -37,7 +37,6 @@ fs.createReadStream('./authors.csv')
       // Save to file:
       await csv.toDisk('./books_export.csv'); 
       // Return the CSV file as string:
-      console.log(await csv.toString());
     })();
   });
 
@@ -57,14 +56,11 @@ fs.createReadStream('./authors.csv')
       authors: 'samhita',
       publishedAt: '05.07.2011'
     });
-    let booksBasedIsbn =  findBooksBasedIsbn();
-    let magazineBasedIsbn = findMagazinesBasedIsbn();
-    let magazineDataBasedEmail = findMagazinesBasedEmail();
-    let booksDataBasedEmail = findBooksBasedEmail();
-    console.log("books based on isbn---->", booksBasedIsbn);
-    console.log("magazines based on isbn---->", magazineBasedIsbn);
-    console.log("booksDataBasedEmail---->", booksDataBasedEmail);
-    console.log("magazineDataBasedEmail---->", magazineDataBasedEmail);
+    let dataBasedIsbn = findMagazineOrBookBasedIsbn();
+    console.log("books or magazine based on isbn---->", dataBasedIsbn);  
+    let dataBasedEmail = findBooksAndMagazineBasedEmail ();
+    console.log("books and magazine based mail---->", dataBasedEmail);
+    readlineSync.question('Please press enter to continue');
     let sortData = sortDataBasedTitle();
     console.log("data--->", sortData);
     (async () => {
@@ -72,30 +68,31 @@ fs.createReadStream('./authors.csv')
       // Save to file:
       await csv.toDisk('./magazines_export.csv'); 
       // Return the CSV file as string:
-      console.log(await csv.toString());
     })();
   });
 
   
-  function findMagazinesBasedIsbn (){
-    let isbn = readlineSync.question('Please enter isbn for book');
-    return magazine_found = magazines.find(x=> x.isbn == isbn);
+  function findMagazineOrBookBasedIsbn (){
+    let isbn = readlineSync.question('Please enter isbn: ');
+    magazine_found = magazines.find(x=> x.isbn == isbn);
+    if(magazine_found!= null){
+      return magazine_found;
+    }
+    book_found = books.find(x=> x.isbn == isbn);
+    if(book_found!= null){
+      return book_found;
+    }
+    return 'Data not found';
   }
 
-
-  function findBooksBasedIsbn (){
-    let isbn = readlineSync.question('Please enter isbn for magazine');
-    return book_found = books.find(x=> x.isbn == isbn);
-  }
-
-  function findBooksBasedEmail (){
-    let name = readlineSync.question('Please enter authors email for books');
-    return book_found = books.find(x=> x.authors == name);
-  }
-
-  function findMagazinesBasedEmail (){
-    let name = readlineSync.question('Please enter authors email for magazines');
-    return magazine_found = magazines.find(x=> x.authors == name);
+  function findBooksAndMagazineBasedEmail (){
+    let name = readlineSync.question('Please enter authors email: ');
+    book_found = books.filter(x=> x.authors == name);
+    magazine_found = magazines.filter(x=> x.authors == name);
+    if(magazine_found.length>0 && book_found.length>0){
+      return book_found.concat(magazine_found);
+    }
+    return 'Data not found';
   }
 
   function sortDataBasedTitle (){
